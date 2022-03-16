@@ -179,11 +179,18 @@ type Endpoint struct {
 	Port   string
 }
 
+var util = flag.Bool("util", false, "show utilization")
+var crit = flag.String("crit", "", "show critical path for clock")
+
 func main() {
 	flag.Parse()
 	args := flag.Args()
 
-	data, err := ioutil.ReadFile(args[0])
+	file := "report.json"
+	if len(args) > 0 {
+		file = args[0]
+	}
+	data, err := ioutil.ReadFile(file)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -193,19 +200,24 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Print(info.Utilization.String())
+	if *util {
+		fmt.Print(info.Utilization.String())
+	}
 
 	failnet := ""
 	failfreq := 0.0
 	for net, freq := range info.Fmax {
-		if freq.Achieved < freq.Constraint {
+		if (*crit != "" && strings.Contains(net, *crit)) || freq.Achieved < freq.Constraint {
 			failnet = net
 			failfreq = freq.Constraint
+			break
 		}
 	}
 
 	if failnet != "" {
-		fmt.Println()
+		if *util {
+			fmt.Println()
+		}
 		fmax := make([]float64, 0, len(info.CriticalPaths))
 		for _, cp := range info.CriticalPaths {
 			if strings.Contains(cp.From, failnet) {
@@ -215,7 +227,11 @@ func main() {
 
 		i := argmin(fmax)
 		fmt.Print(info.CriticalPaths[i].String())
-		fmt.Printf("%s failed at %0.2f MHz\n", failnet, failfreq)
+		if info.CriticalPaths[i].Fmax() < failfreq {
+			fmt.Printf("%s failed at %0.2f MHz\n", failnet, failfreq)
+		} else {
+			fmt.Printf("%s succeeded at %0.2f MHz\n", failnet, failfreq)
+		}
 	}
 }
 

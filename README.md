@@ -11,7 +11,7 @@ that caused it to fail.
 $ nextpnr-ecp5 --report report.json --freq 48 ...
 ...
 ERROR: Max frequency for clock   '$glbnet$clk_sys': 44.71 MHz (FAIL at 48.00 MHz)
-$ nextime report.json
+$ nextime -util report.json
 CELL         	TOTAL	USED	UTILIZATION 
 DCCA         	56   	1   	0.02       	
 DP16KD       	56   	24  	0.43       	
@@ -51,3 +51,19 @@ Critical path: top.core.dpath.rf.regs.0.1.0$D -> top.ram.mem.5.0.0[DIA3]
 Max frequency: 44.71 MHz (22.36 ns)
 $glbnet$clk_sys failed at 48.00 MHz
 ```
+
+# Usage
+
+```
+Usage of nextime:
+  -crit string
+    	show critical path for clock
+  -util
+    	show utilization
+```
+
+If no JSON report is provided, Nextime automatically tries to use `report.json`.
+
+When Nextime runs with no arguments it will only report a critical path if
+timing is not met. To view a critical path when timing is met you must request
+it with `-crit`.
