@@ -219,15 +219,17 @@ func main() {
 			fmt.Println()
 		}
 		fmax := make([]float64, 0, len(info.CriticalPaths))
+		cps := make([]CritPath, 0, len(info.CriticalPaths))
 		for _, cp := range info.CriticalPaths {
 			if strings.Contains(cp.From, failnet) {
 				fmax = append(fmax, cp.Fmax())
+				cps = append(cps, cp)
 			}
 		}
 
 		i := argmin(fmax)
-		fmt.Print(info.CriticalPaths[i].String())
-		if info.CriticalPaths[i].Fmax() < failfreq {
+		fmt.Print(cps[i].String())
+		if cps[i].Fmax() < failfreq {
 			fmt.Printf("%s failed at %0.2f MHz\n", failnet, failfreq)
 		} else {
 			fmt.Printf("%s succeeded at %0.2f MHz\n", failnet, failfreq)
