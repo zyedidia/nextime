@@ -180,7 +180,8 @@ type Endpoint struct {
 }
 
 var util = flag.Bool("util", false, "show utilization")
-var crit = flag.String("crit", "", "show critical path for clock")
+var clk = flag.String("clk", "all", "show summary for clock")
+var crit = flag.Bool("crit", false, "also show critical path for selected clock")
 
 func main() {
 	flag.Parse()
@@ -204,37 +205,35 @@ func main() {
 		fmt.Print(info.Utilization.String())
 	}
 
-	failnet := ""
-	failfreq := 0.0
-	for net, freq := range info.Fmax {
-		if (*crit != "" && strings.Contains(net, *crit)) || freq.Achieved < freq.Constraint {
-			failnet = net
-			failfreq = freq.Constraint
-			break
-		}
+	if *clk == "" {
+		return
 	}
 
-	if failnet != "" {
-		if *util {
-			fmt.Println()
-		}
-		fmax := make([]float64, 0, len(info.CriticalPaths))
-		cps := make([]CritPath, 0, len(info.CriticalPaths))
-		for _, cp := range info.CriticalPaths {
-			if strings.Contains(cp.From, failnet) {
-				fmax = append(fmax, cp.Fmax())
-				cps = append(cps, cp)
+	for net, freq := range info.Fmax {
+		if *clk == "all" || strings.Contains(net, *clk) {
+			if net != "" {
+				fmax := make([]float64, 0, len(info.CriticalPaths))
+				cps := make([]CritPath, 0, len(info.CriticalPaths))
+				for _, cp := range info.CriticalPaths {
+					if strings.Contains(cp.From, net) {
+						fmax = append(fmax, cp.Fmax())
+						cps = append(cps, cp)
+					}
+				}
+
+				i := argmin(fmax)
+				if *crit {
+					fmt.Print(cps[i].String())
+				}
+				if cps[i].Fmax() < freq.Constraint {
+					fmt.Printf("%s failed at %0.2f MHz\n", net, freq.Constraint)
+				} else {
+					fmt.Printf("%s succeeded at %0.2f MHz\n", net, freq.Constraint)
+				}
 			}
 		}
-
-		i := argmin(fmax)
-		fmt.Print(cps[i].String())
-		if cps[i].Fmax() < failfreq {
-			fmt.Printf("%s failed at %0.2f MHz\n", failnet, failfreq)
-		} else {
-			fmt.Printf("%s succeeded at %0.2f MHz\n", failnet, failfreq)
-		}
 	}
+
 }
 
 func argmin(arr []float64) int {
