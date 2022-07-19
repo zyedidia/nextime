@@ -180,7 +180,7 @@ type Endpoint struct {
 }
 
 var util = flag.Bool("util", false, "show utilization")
-var clk = flag.String("clk", "all", "show summary for clock")
+var clk = flag.String("clk", "", "show summary for clock")
 var crit = flag.Bool("crit", false, "also show critical path for selected clock")
 
 func main() {

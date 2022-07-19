@@ -56,7 +56,7 @@ $glbnet$clk_sys failed at 48.00 MHz
 ```
 Usage of nextime:
   -clk string
-    	show summary for clock (default "all")
+    	show summary for clock ("all" for all clocks)
   -crit
     	also show critical path for selected clock
   -util
