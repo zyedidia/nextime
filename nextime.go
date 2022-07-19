@@ -226,9 +226,9 @@ func main() {
 					fmt.Print(cps[i].String())
 				}
 				if cps[i].Fmax() < freq.Constraint {
-					fmt.Printf("%s failed at %0.2f MHz\n", net, freq.Constraint)
+					fmt.Printf("%s is %.2f MHz (failed at %0.2f MHz)\n", net, cps[i].Fmax(), freq.Constraint)
 				} else {
-					fmt.Printf("%s succeeded at %0.2f MHz\n", net, freq.Constraint)
+					fmt.Printf("%s is %.2f MHz (succeeded at %0.2f MHz)\n", net, cps[i].Fmax(), freq.Constraint)
 				}
 			}
 		}
